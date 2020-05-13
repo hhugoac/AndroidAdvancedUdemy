@@ -1,7 +1,6 @@
 package io.neverstoplearning.advancedandroid.base;
 
 import javax.inject.Singleton;
-
 import dagger.Component;
 
 @Singleton

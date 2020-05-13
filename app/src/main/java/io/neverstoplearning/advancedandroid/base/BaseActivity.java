@@ -19,13 +19,14 @@ import javax.inject.Inject;
 import io.neverstoplearning.advancedandroid.R;
 import io.neverstoplearning.advancedandroid.di.Injector;
 import io.neverstoplearning.advancedandroid.di.ScreenInjector;
+import io.neverstoplearning.advancedandroid.ui.ScreenNavigator;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
     private static final String INSTANCE_ID_KEY = "instance_id";
 
     @Inject ScreenInjector screenInjector;
-
+    @Inject ScreenNavigator screenNavigator;
     private String instanceId;
     private Router router;
 
@@ -46,6 +47,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
 
         router = Conductor.attachRouter(this, screenContainer, savedInstanceState);
+        screenNavigator.initWithRouter(router, initialScreen());
         monitorBackStack();
     }
 
@@ -55,8 +57,17 @@ public abstract class BaseActivity extends AppCompatActivity {
         outState.putString(INSTANCE_ID_KEY, instanceId);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (!screenNavigator.pop()) {
+            super.onBackPressed();
+        }
+    }
+
     @LayoutRes
     protected abstract int layoutRes();
+
+    protected abstract Controller initialScreen();
 
     public String getInstanceId() {
         return instanceId;
@@ -65,6 +76,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        screenNavigator.clear();
         if (isFinishing()) {
             Injector.clearComponent(this);
         }
